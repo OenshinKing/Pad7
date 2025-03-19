@@ -1,14 +1,16 @@
-Algorithm Decrypt
-Input: string $A$ and its length integer $n$
+***Algorithm Decrypt***
 
-Output: code of $A$ in the dictionary
+**Input**: string $A$ and its length integer $n$
 
-Strings whose codes need to be stored first:
+**Output**: code of $A$ in the dictionary
+
+**Strings whose codes need to be stored first**:
 "$\alpha$ z", 
 "$\alpha$ yz", 
 "$\alpha$ xyz", 
 "$\alpha$ wxyz", 
 "$\alpha$ vwxyz",
+
 where $\alpha$ represents the character that can form string that satisfies requirement.
 
 	function Decrypt(A, n)
@@ -23,6 +25,7 @@ where $\alpha$ represents the character that can form string that satisfies requ
 		or if A has been stored
 			return stored code of A
 		else
-			return Decrypt("z"*(n-1), n-1) + Decrypt((A[1]-1)+"z"*(n-1), n) + the ASCII code of A[n] - the ASCII code of A[n-1]
+			return Decrypt("z"*(n-1), n-1) + Decrypt((A[1]-1)+"z"*(n-1), n) 
+				   + the ASCII code of A[n] - the ASCII code of A[n-1]
 		endif
 	endfunction
