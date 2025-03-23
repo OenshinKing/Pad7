@@ -1,8 +1,8 @@
 ***Algorithm MatrixChainMultiplication***
 
-**Input:** Prameters of n matrixes stored in matrix A whose column i stands for the number of rows of the ird matrix in the chain and matrix B whose column i stands for the number of columns of the ird matrix in the chain.
+**Input:** Parameters of n matrixes stored in matrix A whose column i stands for the number of rows of the ird matrix in the chain and matrix B whose column i stands for the number of columns of the ird matrix in the chain.
 
-**Output:** The minimun of times of total basic caculations.
+**Output:** The minimum of times of total basic calculations.
 
     function MCM(A,B,n)
         for c from 0 to n-1
