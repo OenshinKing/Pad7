@@ -1,53 +1,53 @@
-MUL1:	MOV A,#34H
-	MOV B,#78H
+MUL1:	MOV A,30H;	A = (30H) = 34H
+	MOV B,32H;	B = (32H) = 78H
 	MUL AB
-	MOV 30H,B;	(30H) = b0
+	MOV 34H,B;	(34H) = b0
 	PUSH ACC;	finish a
 
-MUL2:	MOV A,#12H
-	MOV B,#78H
+MUL2:	MOV A,31H;	A = (31H) = 12H
+	MOV B,32H;	B = (32H) = 78H
 	MUL AB
-	MOV 31H,B;	(31H) = c1
-	MOV 32H,A;	(32H) = b1
+	MOV 35H,B;	(35H) = c1
+	MOV 36H,A;	(36H) = b1
 
-MUL3:	MOV A,#34H
-	MOV B,#56H
+MUL3:	MOV A,30H;	A = (30H) = 34H
+	MOV B,33H;	B = (33H) = 56H
 	MUL AB
-	MOV 33H,B;	(33H) = c2
-	MOV 34H,A;	(34H) = b2
+	MOV 37H,B;	(37H) = c2
+	MOV 38H,A;	(38H) = b2
 
-MUL4:	MOV A,#12H
-	MOV B,#56H
+MUL4:	MOV A,31H;	A = (31H) = 12H
+	MOV B,33H;	B = (33H) = 56H
 	MUL AB
-	MOV 35H,B;	(35H) = d3
-	MOV 36H,A;	(36H) = c3
+	MOV 39H,B;	(39H) = d3
+	MOV 40H,A;	(40H) = c3
 
-ADD1:	MOV A,30H
-	ADDC A,32H;	add b0 and b1, release 30H and 32H
-	MOV 30H,A;	(30H) = b0+b1, leave 32H
+ADD1:	MOV A,34H
+	ADDC A,36H;	add b0 and b1, release 34H and 36H
+	MOV 34H,A;	(34H) = b0+b1, leave 36H
 
-ADD2:	MOV A,31H
-	ADDC A,33H;	add c1, c2 and CY, release 31H and 33H
-	MOV 31H,A;	(31H) = c1+c2+CY, leave 33H
+ADD2:	MOV A,35H
+	ADDC A,37H;	add c1, c2 and CY, release 35H and 37H
+	MOV 35H,A;	(35H) = c1+c2+CY, leave 37H
 
 ADD3:	MOV A,#0H
-	ADDC A,35H	
-	MOV 32H,A;	(32H) = d3+CY, release 35H
+	ADDC A,39H;	
+	MOV 36H,A;	(36H) = d3+CY, release 39H
 
-ADD4:	MOV A,30H
+ADD4:	MOV A,34H
 	CLR C
-	ADDC A,34H;	add b2, b0+b1, release 34H
-	PUSH ACC;	finish b, release 30H
+	ADDC A,38H;	add b2, b0+b1, release 38H
+	PUSH ACC;	finish b, release 34H
 
-ADD5:	MOV A,31H
-	ADDC A,36H;	add c3, c1+c2, release 36H
-	PUSH ACC;	finish c, release 31H
+ADD5:	MOV A,35H
+	ADDC A,40H;	add c3, c1+c2, release 40H
+	PUSH ACC;	finish c, release 35H
 
 ADD6:	MOV A,#0H
-	ADDC A,32H
-	PUSH ACC;	finish d, release 32H
+	ADDC A,36H
+	PUSH ACC;	finish d, release 36H
 
-STORE:	POP 30H;	(30H) = d
-	POP 31H;	(31H) = c
-	POP 32H;	(32H) = b
-	POP 33H;	(33H) = a
+STORE:	POP 37H;	(37H) = d
+	POP 36H;	(36H) = c
+	POP 35H;	(35H) = b
+	POP 34H;	(34H) = a
