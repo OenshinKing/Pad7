@@ -8,8 +8,35 @@ using namespace std;
  * ADDC and SUBB give output that has the same length as their input
  */
 
-static int count_add = 0, count_mul = 0;
-const int INT_BITS = sizeof(int) * 8, SHORT_BITS = sizeof(short) * 8;
+int& count_add(int a, int b)
+{
+	static int count = 0;
+	a = a & INT_MAX, b = b & INT_MAX;
+	if ((!a) || (!b))
+		return count;
+	int aBits = 1, bBits = 1;
+	while((a = a>>1)&INT_MAX)
+		aBits++;
+	while((b = b>>1)&INT_MAX)
+		bBits++;
+	count += aBits < bBits ? aBits : bBits;
+	return count;
+}
+
+int& count_mul(int a, int b)
+{
+	static int count = 0;
+	a = a & INT_MAX, b = b & INT_MAX;
+	if ((!a) || (!b))
+		return count;
+	int aBits = 1, bBits = 1;
+	while ((a = a >> 1)&INT_MAX)
+		aBits++;
+	while ((b = b >> 1)&INT_MAX)
+		bBits++;
+	count += aBits * bBits;
+	return count;
+}
 
 short* DOWN(int* a, const int LEN)
 {
@@ -24,7 +51,7 @@ short* DOWN(int* a, const int LEN)
 		result[i] += a[i] % 256;
 		result[i-1] = a[i] / 256;
 
-		count_add += INT_BITS; 
+		count_add(result[i],a[i]%256);
 	}
 
 	// overflow is stored in result[0]; 
@@ -33,7 +60,7 @@ short* DOWN(int* a, const int LEN)
 	
 	result[0] += a[0];
 
-	count_add += INT_BITS;
+	count_add(result[0],a[0]);
 
 	return result;
 }
@@ -46,7 +73,7 @@ short* ADDC(short* a, short* b, const int LEN)
 	for (int i = LEN-1; i >= 0; i--)
 	{
 		RESULT[i] = a[i] + b[i];
-		count_add += SHORT_BITS;
+		count_add(a[i],b[i]);
 	}
 
 	short* result = DOWN(RESULT, LEN);
@@ -67,7 +94,8 @@ int* ADDC(short* a, short* b, short* c, const int LEN)
 		result[i+SPLIT*2] = b[i+SPLIT] + c[i];
 		result[i+SPLIT*3] = c[i+SPLIT];
 
-		count_add += SHORT_BITS * 3;
+		count_add(a[i+SPLIT],b[i]);
+		count_add(b[i+SPLIT],c[i]);
 	}
 	return result;
 }
@@ -83,19 +111,22 @@ short* SUBB(short* a, short* b, short* c, const int LEN)
 		RESULT[i] += a[i] - b[i] - c[i];
 		RESULT[i-1] = 0;
 
-		count_add += SHORT_BITS * 2;
+		count_add(a[i],b[i]);
+		count_add(a[i]-b[i],c[i]);
 
 		while (RESULT[i] < 0 && i!=0)
 		{
 			RESULT[i] += 256;
 			RESULT[i-1] -= 1;
 
-			count_add += SHORT_BITS * 2;
+			count_add(RESULT[i],256);
+			count_add(RESULT[i-1],1);
 		}
 	}
 	RESULT[0] += a[0] - b[0] - c[0];
 
-	count_add += SHORT_BITS * 2;
+	count_add(a[0],b[0]);
+	count_add(a[0]-b[0],c[0]);
 
 	short* result = DOWN(RESULT,LEN);
 	delete[] RESULT;
@@ -116,7 +147,7 @@ short* MUL(short* a, short* b, const int LEN)
 		RESULT[size-1] = a[LEN-1] * b[LEN-1];
 		RESULT[size-2] = 0;
 
-		count_mul += SHORT_BITS * SHORT_BITS;
+		count_mul(a[LEN-1],b[LEN-1]);
 	}
 
 	else
@@ -192,10 +223,10 @@ int main()
 		for (int i = 0; i < len * 2; i++)
 			resultFile << hex << result[i] << ' ';
 		resultFile << endl;
-		countFile << bits << ',' <<count_add << ',' << count_mul << endl;
+		countFile << bits << ',' << count_add(0,0) << ',' << count_mul(0,0) << endl;
 
 		// restart
-		count_add = count_mul = 0;
+		count_add(0,0) = count_mul(0,0) = 0;
 		delete[] result;
 	}
 	return 0;
