@@ -1,55 +1,84 @@
 #include <iostream>
 
+template <typename T>
+void coutf(const char *str, T data)
+{
+	using namespace std;
+	static const int WIDTH = 15;
+	cout.fill(' '), cout.setf(ios::right);
+	cout << '\t', cout.width(WIDTH), cout << str, cout.flush(), cout << data << endl;
+}
+
 class FacultyMember
 {
 protected:
+	const char *Name;
 	float basicSalary;
-	const char* Name;
+
+	virtual float Salary() = 0;
+
 public:
+	FacultyMember(const char *name, float salary) : Name(name), basicSalary(salary) {}
+
+	template <typename T>
+	friend void coutf(const char *str, T data);
+
 	virtual void printInfo()
 	{
-		printf("Salary Information\n\tName: %s\nTotal Salary: %.2f\nBasic Salary: %.2f\n", Name, Salary(), basicSalary);
+		std::cout << "SALARY INFOMATION\nBasic" << std::endl;
+		coutf("Name: ", Name);
+		coutf("Total salary: ", Salary());
+		coutf("Basic salary: ", basicSalary);
+		std::cout << "Additional" << std::endl;
 	}
-	virtual float Salary() = 0;
-	FacultyMember(const char* name, float salary) : Name(name), basicSalary(salary) {}
 };
 
-enum perkForTeacher {Professor = 50, AdjunctProfessor = 30, Lecturer = 20};
+enum perkForTeacher
+{
+	Professor = 50,
+	AdjunctProfessor = 30,
+	Lecturer = 20
+};
 class teacher : public FacultyMember
 {
 private:
-         float fixedSalary;
-	 int classHour;
-	 int perkPerClass;
-	 const char* Title;
-	 
-	 float classPerk()
-	 {
-		return classHour * perkPerClass;
-	 }
-public:
-	 void printInfo()
-	 {
-		FacultyMember::printInfo();
-		printf("Teacher Title: %s\nClass Hours: %d\nClass Perk: %.2f\n\n",Title, classHour, classPerk());
-	 }
-	teacher(const char* name, float salary1, float salary2, int work, int title):
-	FacultyMember(name,salary1), fixedSalary(salary2), classHour(work), perkPerClass(title),Title(nullptr)
+	float fixedSalary;
+	int classHour;
+	perkForTeacher perkPerClass;
+	const char *Title;
+
+	float classPerk()
 	{
-		switch(perkPerClass)
+		return classHour * perkPerClass;
+	}
+
+public:
+	teacher(const char *name, float salary1, float salary2, int work, perkForTeacher title)
+		: FacultyMember(name, salary1), fixedSalary(salary2), classHour(work), perkPerClass(title), Title(nullptr)
+	{
+		switch (perkPerClass)
 		{
-			case 50:
-				Title = "Professor";
-				break;
-			case 30:
-				Title = "Adjunct Professor";
-				break;
-			case 20:
-				Title = "Lecturer";
-				break;
-			default:
-				Title = "Other";
+		case 50:
+			Title = "Professor";
+			break;
+		case 30:
+			Title = "Adjunct Professor";
+			break;
+		case 20:
+			Title = "Lecturer";
+			break;
+		default:
+			Title = "Other";
 		}
+	}
+	void printInfo()
+	{
+		FacultyMember::printInfo();
+		coutf("Faculty type: ", "Teacher");
+		coutf("Teacher title: ", Title);
+		coutf("Class hour: ", classHour);
+		coutf("Class perk: ", classPerk());
+		std::cout << std::endl;
 	}
 
 	float Salary()
@@ -62,37 +91,44 @@ class manager : public FacultyMember
 {
 private:
 	float facultySalary;
+
 public:
 	void printInfo()
 	{
 		FacultyMember::printInfo();
-		printf("Faculty Salary: %.2f\n\n", facultySalary);
+		coutf("Faculty type: ", "manager");
+		coutf("Faculty salary: ", facultySalary);
+		std::cout << std::endl;
 	}
-	manager(const char* name, float salary1, float salary2): FacultyMember(name,salary1), facultySalary(salary2) {}
+	manager(const char *name, float salary1, float salary2) : FacultyMember(name, salary1), facultySalary(salary2) {}
 	float Salary()
 	{
 		return basicSalary + facultySalary;
 	}
 };
 
-class laboratory : public FacultyMember
+class labPersonnel : public FacultyMember
 {
 private:
-	float perkPerWorkday;
 	int workdays;
+	float perkPerWorkday;
 
 	float workdayPerk()
 	{
 		return workdays * perkPerWorkday;
 	}
+
 public:
 	void printInfo()
 	{
 		FacultyMember::printInfo();
-		printf("Work Days: %d\nWorkday Perk: %.2f\n\n", workdays, workdayPerk());
+		coutf("Faculty type: ", "Lab personnel");
+		coutf("Work days: ", workdays);
+		coutf("Workday perk: ", workdayPerk());
+		std::cout << std::endl;
 	}
-	laboratory(const char* name, float salary1, int work, float salary2)
-	: FacultyMember(name,salary1), workdays(work), perkPerWorkday(salary2) {}
+	labPersonnel(const char *name, float salary1, int work, float salary2)
+		: FacultyMember(name, salary1), workdays(work), perkPerWorkday(salary2) {}
 	float Salary()
 	{
 		return basicSalary + workdayPerk();
@@ -101,10 +137,9 @@ public:
 
 int main()
 {
-	std::cout << "Hello world!\n";
-	teacher A("Aris",1000,2000,50,Professor);
-	manager B("Yuuka",100,200);
-	laboratory C("Momori",1000,50,20);
+	teacher A("Aris", 1000, 2000, 50, Professor);
+	manager B("Yuuka", 1000, 2000);
+	labPersonnel C("Momori", 1000, 50, 20);
 	A.printInfo(), B.printInfo(), C.printInfo();
 	return 0;
 }
