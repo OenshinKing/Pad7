@@ -3,6 +3,25 @@
 
 using namespace std;
 
+int count_add(int a, int b)
+{
+	static int count = 0;
+	if ((!a) || (!b))
+		return 0;
+	int aBits = 1, bBits = 1;
+	a = a & INT_MAX, b = b & INT_MAX;
+	while((a = a>>1)&INT_MIN)
+		aBits++;
+	while((b = b>>1)&INT_MIN)
+		bBits++;
+	return (count += a > b ? a : b);
+}
+
+int count_mul(int a, int b)
+{
+	
+}
+
 void split(unsigned int num, unsigned int &low, unsigned int &high)
 {
 	static const int EX_L = UINT_MAX >> (sizeof(int) * 4);
