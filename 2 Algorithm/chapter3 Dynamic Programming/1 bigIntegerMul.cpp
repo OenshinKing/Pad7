@@ -35,6 +35,7 @@ int& count_mul(int a, int b)
 	while ((b = b >> 1)&INT_MAX)
 		bBits++;
 	count += aBits * bBits;
+	count_add(0,0) += (aBits-1) * (bBits-1);
 	return count;
 }
 
