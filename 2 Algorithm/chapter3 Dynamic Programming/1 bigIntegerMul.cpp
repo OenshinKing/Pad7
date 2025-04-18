@@ -194,7 +194,7 @@ int main()
 	cin >> times;
 
 	short *a = new short[len], *b = new short[len];
-	ifstream file_L("1IO/DEC1024_L.txt"), file_R("1IO/DEC1024_R.txt");
+	ifstream file_L("1IO/HEX1024_L.txt"), file_R("1IO/HEX1024_R.txt");
 	ofstream resultFile("1IO/1 result.txt"), countFile("1IO/1 count.txt",ios::app);
 
 	for (int j = 0; j < times; j++)
@@ -202,8 +202,8 @@ int main()
 		// input
 		for (int i = 0; i < len; i++)
 		{
-			file_L >> a[i];
-			file_R >> b[i];
+			file_L >> hex >> a[i];
+			file_R >> hex >> b[i];
 			file_L.get(), file_R.get();
 		}
 
@@ -222,7 +222,7 @@ int main()
 
 		// output
 		for (int i = 0; i < len * 2; i++)
-			resultFile << hex << result[i] << ' ';
+			resultFile << setw(2) << setfill('0') << setiosflags(ios::right) << hex << result[i] << ' ';
 		resultFile << endl;
 		countFile << bits << ',' << count_add(0,0) << ',' << count_mul(0,0) << endl;
 
