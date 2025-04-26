@@ -1,10 +1,7 @@
 from random import random
 
-# file1 = open("1IO/DEC1024_L.txt", 'w')
-file2 = open("1IO/HEX1024_L.txt",'w')
-
-# file3 = open("1IO/DEC1024_R.txt", 'w')
-file4 = open("1IO/HEX1024_R.txt",'w')
+file_L = open("HEX1024_L.txt",'w')
+file_R = open("HEX1024_R.txt",'w')
 
 for j in range(0,50):
     num_L = ''
@@ -33,19 +30,13 @@ for j in range(0,50):
 
     for i in segments_L:
         num_L = int(i,2)
-        # file1.write(format(num_L,'d') + ',')
-        file2.write(format(num_L,'X').zfill(2) + ',')
-    # file1.write('\n')
-    file2.write('\n')
+        file_L.write(format(num_L,'X').zfill(2) + ',')
+    file_L.write('\n')
 
     for i in segments_R:
         num_R = int(i,2)
-        # file3.write(format(num_R,'d') + ',')
-        file4.write(format(num_R,'X').zfill(2) + ',')
-    # file3.write('\n')
-    file4.write('\n')
+        file_R.write(format(num_R,'X').zfill(2) + ',')
+    file_R.write('\n')
 
-# file1.close()
-file2.close()
-# file3.close()
-file4.close()
+file_L.close()
+file_R.close()

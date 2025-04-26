@@ -29,24 +29,24 @@ def LCS(s1,s2):
 
 
 chars = ascii_letters+digits
-size = 32
 
-file = open("D:\\1华工\\1课程\\大二下\\Pad7\\2 Algorithm\\chapter3 Dynamic Programming\\1IO\\2 time.csv",'w')
+file = open(r"1IO\\2 time.csv","w")
 file.write("M,N,Time\n")
-for i in range(1,size+1):
-    for j in range(1,size+1):
+input_size = [10,50,100,500,900]
+for i in input_size:
+    for j in input_size:
         print(i,j)
         for k in range(1,20):
             time_list = list()
 
             a, b = "", ""
-            for k in range(0,i*16+1):
+            for k in range(0,i):
                 a += choice(chars)
-            for l in range(0,j*16+1):
+            for l in range(0,j):
                 b += choice(chars)
 
             time_list.append(LCS(a,b)[0])
         time_mean = np.array(time_list).mean()
-        file.write(','.join([str(i*16),str(j*16),f"{time_mean}"]) + '\n')
+        file.write(','.join([str(i),str(j),f"{time_mean}"]) + '\n')
 
 file.close()
