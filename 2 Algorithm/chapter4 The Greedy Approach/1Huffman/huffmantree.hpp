@@ -138,26 +138,26 @@ void encodeBlock::encode()
 	codeLen[Node::beta-1] = -1;
 
 	stack<char> traverse;
-	char read = Node::beta-1;
-	treeHead.push(read).push(read);
+	char parent = Node::beta-1;
+	treeHead.push(parent).push(parent);
 	
-	while(!traverse.isempty() || read > 0x7f)
+	while(!traverse.isempty() || parent > 0x7f)
 	{
-		if (read <= 0x7f)
+		if (parent <= 0x7f)
 		{
-			traverse.pop(read);
+			traverse.pop(parent);
 			continue;
 		}
 
-		codeTable[L[read-0x80]] = (codeTable[read]<<1) | 0x01 & SHRT_MAX;
-		codeTable[R[read-0x80]] = (codeTable[read]<<1) &  (SHRT_MAX-1);
-		codeLen[L[read-0x80]] = codeLen[R[read-0x80]] = codeLen[read] + 1;
+		codeTable[L[parent-0x80]] = (codeTable[parent]<<1) | 0x01 & SHRT_MAX;
+		codeTable[R[parent-0x80]] = (codeTable[parent]<<1) &  (SHRT_MAX-1);
+		codeLen[L[parent-0x80]] = codeLen[R[parent-0x80]] = codeLen[parent] + 1;
 
-		// check(read);
+		// check(parent);
 
-		traverse.push(R[read-0x80]);
-		treeHead.push(R[read-0x80]).push(L[read-0x80]);
-		read = L[read-0x80];
+		traverse.push(R[parent-0x80]);
+		treeHead.push(R[parent-0x80]).push(L[parent-0x80]);
+		parent = L[parent-0x80];
 	}
 }
 
@@ -254,23 +254,14 @@ char decodeBlock::buildTree(const char* filename)
 
 		treeHead.pop(child);
 		R[parent-0x80] = child;
-		if (child >= 0x80)
-			traverse.push(child);
+		traverse.push(child);
 
 		treeHead.pop(child);
 		L[parent-0x80] = child;
 		
 		// check(parent);
-
-		if (L[parent-0x80] >= 0x80)
-		{
-			traverse.push(R[parent-0x80]);
-			parent = L[parent-0x80];
-		}
-		else if (!treeHead.isempty())
-		{
-			traverse.pop(parent);
-		}
+		
+		parent = child;
 	}
 
 	return par;
@@ -308,7 +299,7 @@ void decodeBlock::writeFile(const char* source, const char* target)
 		}
 
 		child = ( (scan & cache) > 0 )? L[parent-0x80] : R[parent-0x80];
-		scan = scan >> 1 & 0x7F;
+		scan = scan >> 1;
 
 		if (child <= 0x7f)
 		{
