@@ -76,7 +76,7 @@ protected:
 		int i = n, j = child(n,next);
 		while(i <= Tail)
 		{
-			if ((Array[i] < Array[j])^Type)
+			if ((Array[i] < Array[j])^Type && Array[i] != Array[j])
 				swap(Array[i],Array[j]);
 			else return;
 

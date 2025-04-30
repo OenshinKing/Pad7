@@ -8,10 +8,16 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	HuffmanTree Test;
 	if (argv[1][0] == 'e')
-		Test.encode(argv[2], argv[3]);
+	{
+		encodeBlock a(false);
+		a.writeFile(argv[2], argv[3]);
+	}
 	if (argv[1][0] == 'd')
-		Test.decode(argv[2], argv[3]);
+	{
+		decodeBlock b(false);
+		b.writeFile(argv[2], argv[3]);
+	}
+
 	return 0;
 }
