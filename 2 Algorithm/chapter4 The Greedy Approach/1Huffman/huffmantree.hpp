@@ -1,5 +1,4 @@
 #pragma once
-#include<climits>
 #include<iostream>
 #include<fstream>
 
@@ -149,7 +148,7 @@ protected:
 
 		stack<char> traverse;
 		traverse.push(parent);
-		
+		treeHeader.push(parent).push(parent);
 		while(!traverse.isempty())
 		{
 			traverse.pop(parent);
@@ -162,6 +161,8 @@ protected:
 			checkParent(parent);
 			traverse.push(R[int(child)]);
 			traverse.push(L[int(child)]);
+
+			treeHeader.push(R[int(child)]).push(L[int(child)]);
 		}
 
 		return cf.Data;
@@ -181,25 +182,11 @@ public:
 		ofstream output(target, ios::binary);
 		if ((!input.is_open()) || (!output.is_open()))
 		{
-			printf("%s is not open\n", (input.is_open() ? target : source));
+			cout << (!input.is_open() ? source : target) << " was unable to open in encodeBlock::writeFile." << endl;
 			return false;
 		}
 
-
-		stack<char> traverse;
-		traverse.push(root);
-		treeHeader.push(root).push(root);
-
-		char parent, child;
-		while(!traverse.isempty())
-		{
-			traverse.pop(parent);
-			if (parent <= 0x7F) continue;
-
-			child = parent - 0x80;
-			treeHeader.push(R[child]).push(L[child]);
-			traverse.push(R[child]).push(L[child]);
-		}
+		char parent;
 		while(treeHeader.pop(parent))
 			output.write(&parent, sizeof(parent));
 		output.write((char*) &fileLen, sizeof(fileLen));
@@ -235,11 +222,11 @@ private:
 		ifstream input(fileName, ios::binary);
 		if(!input.is_open())
 		{
-			cout << "File " << fileName << " is not open." << endl;
+			cout << fileName << " was unable to open in decodeBlock::buildTree." << endl;
 			return 0;
 		}
 
-		char treeLen = 0;
+		short treeLen = 0;
 		char readerPair[2];
 		readerPair[0] = 0, readerPair[1] = 1;
 		while(readerPair[0] != readerPair[1])
@@ -247,6 +234,8 @@ private:
 			input.read(readerPair, 2);
 			treeHeader.push(readerPair[0]).push(readerPair[1]);
 			treeLen += 2;
+			if (treeLen > 256)
+				return 0;
 		}
 		char &parent = readerPair[0], &child = readerPair[1];
 		treeHeader.pop(parent), treeHeader.pop(root);
@@ -270,20 +259,21 @@ private:
 			checkParent(parent);
 		}
 
-		return treeLen;
+		return root;
 	}
 public:
 	decodeBlock(bool c) : huffmantree(c) {}
 	bool writeFile(const char* source, const char* target) override
 	{
-		char treeLen = buildTree(source);
+		root = buildTree(source);
+		int treeLen = (root - 0x80 + 1) * 2 + 1 + 1;
 
 		ifstream input(source, ios::binary);
 		ofstream output(target);
 
-		if ((!input.is_open()) || (!output.is_open()) || (treeLen == 0))
+		if ((!input.is_open()) || (!output.is_open()) || (root == 0))
 		{
-			cout << ((!input.is_open()) ? source : target) << " was unable to open." << endl;
+			cout << ((!input.is_open()) ? source : target) << " was unable to open in decodeBlock::writeFile." << endl;
 			return false;
 		}
 
@@ -312,114 +302,3 @@ public:
 		return true;
 	}
 };
-/*
-class decodeBlock
-{
-private:
-	char *L, *R;
-	char root;
-
-	char buildTree(const char*);
-	void writeFile(const char*, const char*);
-	inline void check(char);
-public:
-	decodeBlock(const char* source, const char* target, int len = 128)
-		:L(new char[len]), R(new char[len])
-	{
-		root = buildTree(source);
-		writeFile(source,target);
-	}
-	~decodeBlock()
-	{
-		delete[] L;
-		delete[] R;
-	}
-};
-
-char decodeBlock::buildTree(const char* filename)
-{
-	char readerPair[2];
-	readerPair[0] = 0, readerPair[1] = 1;
-	stack<char> treeHead, traverse;
-
-	ifstream source(filename, ios::binary);
-	while (readerPair[0] != readerPair[1])
-	{
-		source.read(readerPair, 2);
-		treeHead.push(readerPair[0]).push(readerPair[1]);
-	}
-
-	char& parent = readerPair[0];
-	char& child = readerPair[1];
-	char par;
-	treeHead.pop(parent);
-	treeHead.pop(par);
-	
-	while (!treeHead.isempty())
-	{
-		if (parent <= 0x7f)
-		{
-			traverse.pop(parent);
-			continue;
-		}
-
-		treeHead.pop(child);
-		R[parent-0x80] = child;
-		traverse.push(child);
-
-		treeHead.pop(child);
-		L[parent-0x80] = child;
-		
-		check(parent);
-		
-		parent = child;
-	}
-
-	return par;
-}
-
-inline void decodeBlock::check(char read)
-{
-		printf("Parent %d Left %d Right %d\n", read, L[read-0x80],R[read-0x80]);
-}
-
-void decodeBlock::writeFile(const char* source, const char* target)
-{
-	char reader[2];
-	reader[0] = 0, reader[1] = 1;
-	
-	int count;
-
-	ifstream input(source, ios::binary);
-	ofstream output(target);
-
-	while (reader[0] != reader[1])
-		input.read(reader,2);
-	input.read((char*) &count, sizeof(count));
-	
-	char& scan = reader[0] = 0;
-	char& cache = reader[1];
-
-	char parent = root, child;
-	while (count)
-	{
-		if(scan == 0)
-		{
-			input.read(&cache, 1);
-			scan = 0x80;
-		}
-
-		child = ( (scan & cache) > 0 )? L[parent-0x80] : R[parent-0x80];
-		scan = scan >> 1;
-
-		if (child <= 0x7f)
-		{
-			output.write(&child, 1);
-			count--;
-			parent = root;
-		}
-		else
-			parent = child;
-	}
-}
-*/
