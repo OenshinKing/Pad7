@@ -7,13 +7,13 @@ using namespace std;
 struct Node
 {
 public:
-	char Data;
+	unsigned char Data;
 	unsigned long Freq;
 
-	static char alpha;
-	static char beta;
+	static unsigned char alpha;
+	static unsigned char beta;
 
-	Node(char a = alpha):Data(alpha),Freq(0){ if(a == alpha) alpha++; }
+	Node(unsigned char a = alpha):Data(alpha),Freq(0){ if(a == alpha) alpha++; }
 	Node(const Node& a):Data(a.Data),Freq(a.Freq){}
 	Node(const Node& a, const Node& b):Data(beta),Freq(1+a.Freq+b.Freq){ beta++; }
 	friend bool operator<(const Node& a, const Node& b)
@@ -36,8 +36,8 @@ public:
 	}
 	
 };
-char Node::beta = 0x80;
-char Node::alpha = 0;
+unsigned char Node::beta = 0x80;
+unsigned char Node::alpha = 0;
 
 class heap : public heapBase<Node>
 {
@@ -82,13 +82,13 @@ public:
 class huffmantree
 {
 protected:
-	char root, *L, *R;
-	stack<char> treeHeader;
+	unsigned char root, *L, *R;
+	stack<unsigned char> treeHeader;
 	bool check;
 	int fileLen;
 
-	virtual char buildTree(const char*) = 0;
-	virtual bool checkParent(char parent)
+	virtual unsigned char buildTree(const char*) = 0;
+	virtual bool checkParent(unsigned char parent)
 	{
 		if ((parent <= 0x7F) || (!check)) return false;
 		cout << "Parent: " << int(parent);
@@ -99,7 +99,7 @@ protected:
 		return true;
 	}
 public:
-	huffmantree(bool c = false) : L(new char[128]), R(new char[128]), check(c) {}
+	huffmantree(bool c = false) : L(new unsigned char[128]), R(new unsigned char[128]), check(c) {}
 	virtual bool writeFile(const char*, const char*) = 0;
 	~huffmantree()
 	{
@@ -112,9 +112,9 @@ class encodeBlock : public huffmantree
 {
 protected:
 	short* codeTable;
-	char* codeLen;
+	unsigned char* codeLen;
 
-	bool checkParent(char parent) override
+	bool checkParent(unsigned char parent) override
 	{
 		if (!huffmantree::checkParent(parent)) return false;
 		cout << "Parent: " << int(codeTable[parent]);
@@ -124,7 +124,7 @@ protected:
 		return true;
 		
 	}
-	char buildTree(const char* fileName) override
+	unsigned char buildTree(const char* fileName) override
 	{
 		heap CF(fileName, 128, MIN_HEAP);
 
@@ -142,11 +142,11 @@ protected:
 			R[int(cf.Data - 0x80)] = cf2.Data;
 		}
 
-		char parent = cf.Data, child;
+		unsigned char parent = cf.Data, child;
 		codeTable[int(parent)] = 1;
 		codeLen[int(parent)] = 0;
 
-		stack<char> traverse;
+		stack<unsigned char> traverse;
 		traverse.push(parent);
 		treeHeader.push(parent).push(parent);
 		while(!traverse.isempty())
@@ -168,7 +168,7 @@ protected:
 		return cf.Data;
 	}
 public:
-	encodeBlock(bool c = false) : huffmantree(c), codeTable(new short[256]), codeLen(new char[256]){}
+	encodeBlock(bool c = false) : huffmantree(c), codeTable(new short[256]), codeLen(new unsigned char[256]){}
 	~encodeBlock()
 	{
 		delete[] codeTable;
@@ -176,7 +176,7 @@ public:
 	}
 	bool writeFile(const char* source, const char* target) override
 	{
-		char root = buildTree(source);
+		unsigned char root = buildTree(source);
 
 		ifstream input(source);
 		ofstream output(target, ios::binary);
@@ -186,13 +186,13 @@ public:
 			return false;
 		}
 
-		char parent;
+		unsigned char parent;
 		while(treeHeader.pop(parent))
-			output.write(&parent, sizeof(parent));
+			output.write((char*) &parent, sizeof(parent));
 		output.write((char*) &fileLen, sizeof(fileLen));
 
 		int read;
-		char cache = 0, scanCache = 0x80, code;
+		unsigned char cache = 0, scanCache = 0x80, code;
 
 		while((read = input.get()) != -1)
 		{
@@ -202,14 +202,14 @@ public:
 				cache = (scanCode & codeTable[read]) > 0 ? cache | scanCache : cache & (~scanCache);
 				if (scanCache == 0x01)
 				{
-					output.write(&cache, sizeof(cache));
+					output.write((char*) &cache, sizeof(cache));
 					cache = 0, scanCache = 0x80;
 					continue;
 				}
 				scanCache = scanCache >> 1;
 			}
 		}
-		output.write(&cache, sizeof(cache));
+		output.write((char*) &cache, sizeof(cache));
 		return true;
 	}
 };
@@ -217,30 +217,30 @@ public:
 class decodeBlock : public huffmantree
 {
 private:
-	char buildTree(const char* fileName) override
+	unsigned char buildTree(const char* fileName) override
 	{
 		ifstream input(fileName, ios::binary);
 		if(!input.is_open())
 		{
 			cout << fileName << " was unable to open in decodeBlock::buildTree." << endl;
-			return 0;
+			return (root = 0);
 		}
 
 		short treeLen = 0;
-		char readerPair[2];
+		unsigned char readerPair[2];
 		readerPair[0] = 0, readerPair[1] = 1;
 		while(readerPair[0] != readerPair[1])
 		{
-			input.read(readerPair, 2);
+			input.read((char*) readerPair, 2);
 			treeHeader.push(readerPair[0]).push(readerPair[1]);
 			treeLen += 2;
 			if (treeLen > 256)
-				return 0;
+				return (root = 0);
 		}
-		char &parent = readerPair[0], &child = readerPair[1];
+		unsigned char &parent = readerPair[0], &child = readerPair[1];
 		treeHeader.pop(parent), treeHeader.pop(root);
 
-		stack<char> traverse;
+		stack<unsigned char> traverse;
 		traverse.push(parent);
 
 		while(!treeHeader.isempty())
@@ -280,13 +280,13 @@ public:
 		input.seekg(treeLen, ios::beg);
 		input.read((char*) &fileLen, 4);
 
-		char cache, scanCache = 0x80, parent = root;
-		input.read(&cache, 1);
+		unsigned char cache, scanCache = 0x80, parent = root;
+		input.read((char*) &cache, 1);
 		while(fileLen)
 		{
 			if (parent <= 0x7F)
 			{
-				output.write(&parent, 1);
+				output.write((char*) &parent, 1);
 				parent = root;
 				fileLen--;
 			}
@@ -295,7 +295,7 @@ public:
 			scanCache = (scanCache >> 1) & 0x7F;
 			if (scanCache == 0)
 			{
-				input.read(&cache, 1);
+				input.read((char*) &cache, 1);
 				scanCache = 0x80;
 			}
 		}
